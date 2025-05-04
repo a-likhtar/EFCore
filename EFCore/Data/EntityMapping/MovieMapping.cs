@@ -27,6 +27,11 @@ public class MovieMapping : IEntityTypeConfiguration<Movie>
             .HasColumnType("varchar(max)");
 
         builder
+            .Property(movie => movie.AgeRating)
+            .HasColumnType("varchar(32)")
+            .HasConversion<string>();
+
+        builder
             .HasOne(m => m.Genre)
             .WithMany(g => g.Movies)
             .HasPrincipalKey(g => g.Id)
@@ -39,7 +44,8 @@ public class MovieMapping : IEntityTypeConfiguration<Movie>
             Title = "The Matrix",
             ReleaseDate = new DateTime(1999, 12, 15),
             Synopsis = "Cool movie",
-            MainGenreId = 1
+            MainGenreId = 1,
+            AgeRating = AgeRating.Adolescent
         });
     }
 }

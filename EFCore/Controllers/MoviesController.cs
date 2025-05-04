@@ -38,6 +38,18 @@ public class MoviesController : Controller
             : Ok(movie);
     }
 
+    [HttpGet("until-age/{ageRating}")]
+    [ProducesResponseType(typeof(List<MovieTitle>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllUntilAge([FromRoute] AgeRating ageRating)
+    {
+        var filteredTitles = await _moviesContext.Movies
+            .Where(movie => movie.AgeRating <= ageRating)
+            .Select(movie => new MovieTitle { Id = movie.Id, Title = movie.Title })
+            .ToListAsync();
+
+        return Ok(filteredTitles);
+    }
+
     [HttpGet("by-year/{year:int}")]
     [ProducesResponseType(typeof(List<MovieTitle>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllByYear([FromRoute] int year)
