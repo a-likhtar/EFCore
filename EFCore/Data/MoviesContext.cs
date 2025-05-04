@@ -11,6 +11,7 @@ public class MoviesContext : DbContext
     {
         optionsBuilder.UseSqlServer(
             "Server=localhost,1433;Database=Movies;User Id=SA;Password=Sbopbxbr2146150!;TrustServerCertificate=True");
+        optionsBuilder.LogTo(Console.WriteLine);
         base.OnConfiguring(optionsBuilder);
     }
 }
