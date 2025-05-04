@@ -29,7 +29,9 @@ public class MoviesController : Controller
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get([FromRoute] int id)
     {
-        var movie = await _moviesContext.Movies.SingleOrDefaultAsync(movie => movie.Id == id);
+        var movie = await _moviesContext.Movies
+            .Include(movie => movie.Genre)
+            .SingleOrDefaultAsync(movie => movie.Id == id);
 
         return movie == null
             ? NotFound()

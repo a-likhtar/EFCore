@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using EFCore.Data;
 using Scalar.AspNetCore;
 
@@ -11,6 +12,10 @@ builder.Services.AddOpenApi();
 
 // Add a DbContext
 builder.Services.AddDbContext<MoviesContext>();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+});
 
 
 var app = builder.Build();
