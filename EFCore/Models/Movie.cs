@@ -7,3 +7,10 @@ public class Movie
     public DateTime ReleaseDate { get; set; }
     public string? Synopsis { get; set; }
 }
+
+public class MovieTitle
+{
+    public int Id { get; set; }
+    
+    public string? Title { get; set; }
+}
