@@ -36,6 +36,12 @@ public class MovieMapping : IEntityTypeConfiguration<Movie>
             .WithMany(g => g.Movies)
             .HasPrincipalKey(g => g.Id)
             .HasForeignKey(m => m.MainGenreId);
+
+        builder.OwnsOne(movie => movie.Director)
+            .ToTable("MovieDirectors");
+
+        builder.OwnsMany(movie => movie.Actors)
+            .ToTable("Movie_Actors");
         
         // Seed - data that needs to be created always
         builder.HasData(new Movie
@@ -47,5 +53,28 @@ public class MovieMapping : IEntityTypeConfiguration<Movie>
             MainGenreId = 1,
             AgeRating = AgeRating.Adolescent
         });
+
+        builder.OwnsOne(movie => movie.Director)
+            .HasData(new
+            {
+                FirstName = "David",
+                LastName = "Fincher",
+                MovieId = 1
+            });
+        
+        builder.OwnsMany(movie => movie.Actors)
+            .HasData(new
+            {
+                FirstName = "Kianu",
+                LastName = "Reeves",
+                Id = 1,
+                MovieId = 1
+            },
+            new {
+                FirstName = "John",
+                LastName = "Smith",
+                Id = 2,
+                MovieId = 1
+            });
     }
 }
