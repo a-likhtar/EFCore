@@ -1,4 +1,5 @@
 using EFCore.Data;
+using EFCore.Data.Repositories;
 using EFCore.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,11 +10,11 @@ namespace EFCore.Controllers;
 [Route("[controller]")]
 public class GenresController : Controller
 {
-    private readonly MoviesContext _moviesContext;
+    private readonly IGenresRepository _genresRepository;
 
-    public GenresController(MoviesContext moviesContext)
+    public GenresController(IGenresRepository genresRepository)
     {
-        _moviesContext = moviesContext;
+        _genresRepository = genresRepository;
     }
 
     [HttpGet("{id:int}")]
@@ -21,7 +22,7 @@ public class GenresController : Controller
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get([FromRoute] int id)
     {
-        var genre = await _moviesContext.Genres.SingleOrDefaultAsync(g => g.Id == id);
+        var genre = await _genresRepository.Get(id);
 
         return genre == null
             ? NotFound()
@@ -32,8 +33,7 @@ public class GenresController : Controller
     [ProducesResponseType(typeof(Genre), StatusCodes.Status201Created)]
     public async Task<IActionResult> Create([FromBody] Genre genre)
     {
-        await _moviesContext.Genres.AddAsync(genre);
-        await _moviesContext.SaveChangesAsync();
+        await _genresRepository.Create(genre);
 
         return CreatedAtAction(nameof(Get), new { id = genre.Id }, genre);
     }

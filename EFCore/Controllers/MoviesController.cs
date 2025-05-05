@@ -1,4 +1,5 @@
 using EFCore.Data;
+using EFCore.Data.Repositories;
 using EFCore.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -10,18 +11,18 @@ namespace EFCore.Controllers;
 [Route("[controller]")]
 public class MoviesController : Controller
 {
-    private readonly MoviesContext _moviesContext;
+    private readonly IMoviesRepository _moviesRepository;
 
-    public MoviesController(MoviesContext moviesContext)
+    public MoviesController(IMoviesRepository moviesRepository)
     {
-        _moviesContext = moviesContext;
+        _moviesRepository = moviesRepository;
     }
 
     [HttpGet]
     [ProducesResponseType(typeof(List<Movie>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll()
     {
-        return Ok(await _moviesContext.Movies.ToListAsync());
+        return Ok(await _moviesRepository.GetAll());
     }
 
     [HttpGet("{id:int}")]
@@ -29,9 +30,7 @@ public class MoviesController : Controller
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Get([FromRoute] int id)
     {
-        var movie = await _moviesContext.Movies
-            .Include(movie => movie.Genre)
-            .SingleOrDefaultAsync(movie => movie.Id == id);
+        var movie = await _moviesRepository.Get(id);
 
         return movie == null
             ? NotFound()
@@ -42,7 +41,7 @@ public class MoviesController : Controller
     [ProducesResponseType(typeof(List<MovieTitle>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllUntilAge([FromRoute] AgeRating ageRating)
     {
-        var filteredTitles = await _moviesContext.Movies
+        var filteredTitles = await _moviesRepository.All()
             .Where(movie => movie.AgeRating <= ageRating)
             .Select(movie => new MovieTitle { Id = movie.Id, Title = movie.Title })
             .ToListAsync();
@@ -54,8 +53,7 @@ public class MoviesController : Controller
     [ProducesResponseType(typeof(List<MovieTitle>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllByYear([FromRoute] int year)
     {
-        IEnumerable<MovieTitle> filteredMovies = await _moviesContext
-            .Movies
+        IEnumerable<MovieTitle> filteredMovies = await _moviesRepository.All()
             .Where(m => m.ReleaseDate.Year == year)
             .Select(m => new MovieTitle
             {
@@ -71,9 +69,8 @@ public class MoviesController : Controller
     [ProducesResponseType(typeof(Movie), StatusCodes.Status201Created)]
     public async Task<IActionResult> Create([FromBody] Movie movie)
     {
-        await _moviesContext.Movies.AddAsync(movie);
-        await _moviesContext.SaveChangesAsync();
-
+        await _moviesRepository.Create(movie);
+        
         return CreatedAtAction(nameof(Get), new { id = movie.Id }, movie);
     }
 
@@ -82,16 +79,8 @@ public class MoviesController : Controller
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update([FromRoute] int id, [FromBody] Movie movie)
     {
-        var existingMovie = await _moviesContext.Movies.FindAsync(id);
-
-        if (existingMovie is null)
-            return NotFound();
-
-        existingMovie.Title = movie.Title;
-        existingMovie.ReleaseDate = movie.ReleaseDate;
-        existingMovie.Synopsis = movie.Synopsis;
-
-        await _moviesContext.SaveChangesAsync();
+        var existingMovie = await _moviesRepository.Update(id, movie);
+        
         return Ok(existingMovie);
     }
 
@@ -100,14 +89,8 @@ public class MoviesController : Controller
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Remove([FromRoute] int id)
     {
-        var existingMovie = await _moviesContext.Movies.FindAsync(id);
-
-        if (existingMovie is null)
-            return NotFound();
+        await _moviesRepository.Delete(id);
         
-        _moviesContext.Remove(existingMovie);
-        await _moviesContext.SaveChangesAsync();
-
         return Ok();
     }
     

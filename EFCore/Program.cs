@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
 using EFCore.Data;
+using EFCore.Data.Repositories;
+using EFCore.Data.Repositories.Implementations;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
@@ -14,6 +16,10 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+// Registering repositories
+builder.Services.AddScoped<IMoviesRepository, MoviesRepository>();
+builder.Services.AddScoped<IGenresRepository, GenresRepository>();
 
 // Add a DbContext
 builder.Services.AddDbContext<MoviesContext>();
