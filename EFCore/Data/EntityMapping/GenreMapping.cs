@@ -11,11 +11,5 @@ public class GenreMapping : IEntityTypeConfiguration<Genre>
     {
         builder.Property(genre => genre.CreatedDate)
             .HasValueGenerator<CreatedDateGenerator>();
-        
-        builder.HasData(new Genre()
-        {
-            Id = 1,
-            Name = "Fantastic"
-        });
     }
 }

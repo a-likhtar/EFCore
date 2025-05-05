@@ -7,6 +7,7 @@ public class Movie
     public DateTime ReleaseDate { get; set; }
     public string? Synopsis { get; set; }
     public AgeRating AgeRating { get; set; }
+    public decimal InternetRating { get; set; }
     
     public Genre Genre { get; set; }
     public int MainGenreId { get; set; }
