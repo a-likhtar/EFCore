@@ -22,15 +22,24 @@ builder.Services.AddScoped<IMoviesRepository, MoviesRepository>();
 builder.Services.AddScoped<IGenresRepository, GenresRepository>();
 
 // Add a DbContext
-builder.Services.AddDbContext<MoviesContext>();
+builder.Services.AddDbContext<MoviesContext>(optionsBuilder =>
+    {
+        var connectionString = builder.Configuration.GetConnectionString("MoviesContext");
+        optionsBuilder
+            .UseSqlServer(connectionString);
+    },
+    ServiceLifetime.Scoped,
+    ServiceLifetime.Singleton);
 
 var app = builder.Build();
 // DIRTY HACK FIX IT
-var scope = app.Services.CreateScope();
-var context = scope.ServiceProvider.GetRequiredService<MoviesContext>();
-var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
-if (pendingMigrations.Any())
-    throw new Exception("Database is not fully migrated for MoviesContext");
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<MoviesContext>();
+    var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+    if (pendingMigrations.Any())
+        throw new Exception("Database is not fully migrated for MoviesContext");
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
